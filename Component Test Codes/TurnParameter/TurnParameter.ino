@@ -12,6 +12,9 @@
 * This code will help to find the turning parameter 'd' using trial
 * and error.
 * 
+* Update : After a couple of trials and errors, the turning parameter
+* came out to be 0.8 s
+*
 * Created by Viral Patel
 * April 15, 2018
 */
@@ -61,22 +64,24 @@ void loop() {
 *   that time is represented by parameter d.
 */
 
-void tleft_90(int d) {
+void tleft_90(float d) {
   digitalWrite(mR_Pin1, LOW);
   digitalWrite(mR_Pin2, HIGH);
   digitalWrite(mL_Pin1, LOW);
   digitalWrite(mL_Pin2, HIGH);  
   int delays = d * 1000;
+  //Serial.println(delays);
   delay(delays);
   stop_m();
 }
 
-void tright_90(int d) {
+void tright_90(float d) {
   digitalWrite(mR_Pin1, HIGH);
   digitalWrite(mR_Pin2, LOW);
   digitalWrite(mL_Pin1, HIGH);
   digitalWrite(mL_Pin2, LOW);  
   int delays = d * 1000;
+  //Serial.println(delays);
   delay(delays);
   stop_m();
 }

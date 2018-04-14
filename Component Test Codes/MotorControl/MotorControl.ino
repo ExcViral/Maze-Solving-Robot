@@ -81,7 +81,7 @@ void mforward() {
 *   that time is represented by parameter d.
 */
 
-void tleft_90(int d) {
+void tleft_90(float d) {
   digitalWrite(mR_Pin1, LOW);
   digitalWrite(mR_Pin2, HIGH);
   digitalWrite(mL_Pin1, LOW);
@@ -91,7 +91,7 @@ void tleft_90(int d) {
   stop_m();
 }
 
-void tright_90(int d) {
+void tright_90(float d) {
   digitalWrite(mR_Pin1, HIGH);
   digitalWrite(mR_Pin2, LOW);
   digitalWrite(mL_Pin1, HIGH);
