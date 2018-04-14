@@ -1,5 +1,5 @@
 /*
-* This code is to test if the ultrasonic sensors are working
+* This code is to test if the ultrasonic sensors on the robot are working
 * as expected.
 * In our robot, we have three ultrasonic sensors, one on the
 * front, and one each on left and right side of the robot.
