@@ -7,8 +7,8 @@
 * The movements and actions of the robot will depend upon the
 * readings given by the IR sensor.
 *
-* IR sensor gives LOW reading when on Black surface.
-* On non-black surface, the sensor gives HIGH reading.
+* IR sensor gives HIGH reading when on Black surface.
+* On non-black surface, the sensor gives LOW reading.
 *
 * Created by Viral Patel
 * April 14, 2018
@@ -24,7 +24,7 @@ void setup() {
 void loop() {
   int flag = checkCenter();
   
-  if(flag == LOW) {
+  if(flag == HIGH) {
     Serial.println("The robot is at the center!");
   }
   else {
