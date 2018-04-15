@@ -107,3 +107,19 @@ void stop_m() {
   digitalWrite(mL_Pin1, LOW);
   digitalWrite(mL_Pin2, LOW);  
 }
+
+void stop_lm(float d) {
+  digitalWrite(mL_Pin1, LOW);
+  digitalWrite(mL_Pin2, LOW);
+  int delays = d * 1000;
+  delay(delays);
+  mforward();
+}
+
+void stop_rm(float d) {
+  digitalWrite(mR_Pin1, LOW);
+  digitalWrite(mR_Pin2, LOW);
+  int delays = d * 1000;
+  delay(delays);
+  mforward();
+}
