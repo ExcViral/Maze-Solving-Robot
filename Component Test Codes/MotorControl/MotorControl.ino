@@ -101,6 +101,16 @@ void tright_90(float d) {
   stop_m();
 }
 
+void turn_180(float d) {
+  digitalWrite(mR_Pin1, HIGH);
+  digitalWrite(mR_Pin2, LOW);
+  digitalWrite(mL_Pin1, HIGH);
+  digitalWrite(mL_Pin2, LOW);  
+  int delays = 2 * d * 1000;
+  delay(delays);
+  stop_m();
+}
+
 void stop_m() {
   digitalWrite(mR_Pin1, LOW);
   digitalWrite(mR_Pin2, LOW);
