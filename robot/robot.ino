@@ -125,10 +125,16 @@ void move_forward() {
   else if(r <= threshold && l >= range) {
     calibrate_singlewall_right(r, threshold);
   }
+  else if(l <= range && r >= range) {
+    calibrate_singlewall_left(l, threshold);
+  }
+  else if(r <= range && l >= range) {
+    calibrate_singlewall_right(r, threshold);
+  }
   else if(f < threshold) {
     stop_m();
   }
-  else {
+  else if(l >= range && r >= range){
     mforward();
   } 
 }
