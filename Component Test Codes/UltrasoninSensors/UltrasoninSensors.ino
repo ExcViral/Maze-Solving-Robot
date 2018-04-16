@@ -48,14 +48,15 @@ void setup() {
 void loop() {
   
   int range = 8;
+  int r_freq = 20;
   int l, r, f;
   //l = m_ls();
   //r = m_rs();
   //f = m_fs();
   
-  l = isWallOnLeft(range);
-  r = isWallOnRight(range);
-  f = isWallOnFront(range);
+  l = isWallOnLeft(range, r_freq);
+  r = isWallOnRight(range, r_freq);
+  f = isWallOnFront(range, r_freq);
   
   Serial.print("Obstacle Distance, l = ");
   Serial.print(l);
@@ -81,48 +82,49 @@ void loop() {
 * However, to avoid error in measurement, we will have to take
 * multiple measurements and decide whether there is wall on a
 * side or not.
+* Recommendation : Call this function only when robot is stationary
 *
 */
 
-int isWallOnLeft(int range) {
+int isWallOnLeft(int range, int r_freq) {
   float flag = 0;
-  for(int i = 0; i < 20; i++) {
+  for(int i = 0; i < r_freq; i++) {
     int distance = m_ls();
     if(distance <= range) {
       flag++;
     }
   }
-  flag = flag/20;
+  flag = flag/r_freq;
   if(flag >= 0.8) {
     return 1;
   }
   return 0;
 }
 
-int isWallOnRight(int range) {
+int isWallOnRight(int range, int r_freq) {
   float flag = 0;
-  for(int i = 0; i < 20; i++) {
+  for(int i = 0; i < r_freq; i++) {
     int distance = m_rs();
     if(distance <= range) {
       flag++;
     }
   }
-  flag = flag/20;
+  flag = flag/r_freq;
   if(flag >= 0.8) {
     return 1;
   }
   return 0;
 }
 
-int isWallOnFront(int range) {
+int isWallOnFront(int range, int r_freq) {
   float flag = 0;
-  for(int i = 0; i < 20; i++) {
+  for(int i = 0; i < r_freq; i++) {
     int distance = m_fs();
     if(distance <= range) {
       flag++;
     }
   }
-  flag = flag/20;
+  flag = flag/r_freq;
   if(flag >= 0.8) {
     return 1;
   }
