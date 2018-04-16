@@ -81,33 +81,29 @@ void loop() {
    * g    stop motor
    * def  stop motor
    */
+   calibrate_singlewall_left(2,3);
   char ch = Serial.read();
-  switch (ch){
-    case 'a':
-        move_forward();
-      break;
-    case 'b':
-        takeSensorReading();
-      break;
-    case 'c':
-        checkCenter();
-      break;
-    case 'd':
-        tleft_90();
-      break;  
-    case 'e':
-      tright_90();
-      break;
-    case 'f':
-      turn_180();
-      break;
-    case 'g':
-      stop_m();
-      break;
-    default:
-      // stop_m();
-      break;
-  } 
+  if(ch=='a'){
+    move_forward();
+  }
+  else if(ch=='b'){
+    takeSensorReading();
+  }
+  else if(ch=='c'){
+    checkCenter();
+  }
+  else if(ch=='d'){
+    tleft_90();
+  }
+  else if(ch=='e'){
+    tright_90();
+  }
+  else if(ch=='f'){
+    turn_180();
+  }
+  else if(ch=='g'){
+    stop_m();
+  }
 }
 
 // Higher level function declarations
@@ -115,9 +111,9 @@ void loop() {
 // *** function to move forward avoiding walls
 void move_forward() {
   int l, r, f;
-  l = m_ls(); // measure left sensor reading
-  r = m_rs(); // measure right sensor reading
-  f = m_fs(); // measure front sensor reading
+  l = 1000; // measure left sensor reading
+  r = 100; // measure right sensor reading
+  f = 100; // measure front sensor reading
   if(l <= threshold && r <= range) {
     calibrate(l, r);
   }
