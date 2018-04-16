@@ -281,11 +281,11 @@ int m_fs() {
 
 // *** check if robot is at center of block
 // **** returns LOW for black, HIGH for not black
-int checkCenter() {
+void checkCenter() {
   int ir_reading;
   ir_reading = digitalRead(irPin);
   delay(sd);
-  return ir_reading;
+  Serial.println(ir_reading);
 }
 
 // Motor Control Board
