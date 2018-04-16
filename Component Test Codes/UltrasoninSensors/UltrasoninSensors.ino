@@ -42,33 +42,102 @@ void setup() {
   pinMode(f_echoPin,INPUT); // Sets echopin as input
   
   Serial.begin(9600); // Begin Serial communication
+  Serial.println("Serial Communication is ready!!!");
 }
 
 void loop() {
   
+  int range = 8;
   int l, r, f;
-  l = m_ls();
-  r = m_rs();
-  f = m_fs();
+  //l = m_ls();
+  //r = m_rs();
+  //f = m_fs();
+  
+  l = isWallOnLeft(range);
+  r = isWallOnRight(range);
+  f = isWallOnFront(range);
   
   Serial.print("Obstacle Distance, l = ");
   Serial.print(l);
   Serial.print(" r = ");
   Serial.print(r);
   Serial.print(" f = "); 
-  Serial.println(f); 
+  Serial.println(f);
+  //Serial.println("*****"); 
 }
 
 /*
-* Functions to measure if wall is within 6 cms of any of
+* Functions to check if wall is within range 'range' on 
+* front, left or right side of the robot.
+* value for 'range' should be found using trial and error,
+* keeping offset from center is mind.
+*
+* Function:
+*   Return type : int, returns 1 if within range, else returns 0
+*   Params : range, permissible range for measurement, how far wall
+*     can be at the time of measurement
+*
+* Update : After Testing, in our case, range = 8 cm came out to be fine.
+* However, to avoid error in measurement, we will have to take
+* multiple measurements and decide whether there is wall on a
+* side or not.
+*
+*/
+
+int isWallOnLeft(int range) {
+  float flag = 0;
+  for(int i = 0; i < 20; i++) {
+    int distance = m_ls();
+    if(distance <= range) {
+      flag++;
+    }
+  }
+  flag = flag/20;
+  if(flag >= 0.8) {
+    return 1;
+  }
+  return 0;
+}
+
+int isWallOnRight(int range) {
+  float flag = 0;
+  for(int i = 0; i < 20; i++) {
+    int distance = m_rs();
+    if(distance <= range) {
+      flag++;
+    }
+  }
+  flag = flag/20;
+  if(flag >= 0.8) {
+    return 1;
+  }
+  return 0;
+}
+
+int isWallOnFront(int range) {
+  float flag = 0;
+  for(int i = 0; i < 20; i++) {
+    int distance = m_fs();
+    if(distance <= range) {
+      flag++;
+    }
+  }
+  flag = flag/20;
+  if(flag >= 0.8) {
+    return 1;
+  }
+  return 0;
+}
+
+/*
+* Functions to measure distance of wall from front, left and right
 * the robot's side.
 * Function naming convention: 'm' stands for measure,
 * 'ls','rs','fs' stands for left sensor, right sensor
 * and front sensor respectively.
 * 
 * Function:
-*   Return type: int, returns 1 if there is wall within 6 cm,
-*    and 0 if wall is not within 6 cm.
+*   Return type: int, returns distance in cm
 *   Params : none
 */
 
@@ -76,7 +145,7 @@ int m_ls() {
   
   long duration;
   int distance;
-  int flag;
+  
   // first clear the trigPin
   digitalWrite(l_trigPin, LOW);
   delayMicroseconds(2);
@@ -92,21 +161,13 @@ int m_ls() {
   distance = duration*0.034/2;
   delayMicroseconds(10);
 
-  if(distance < 8) {
-    flag = 1;
-  }
-  else {
-    flag = 0;
-  } 
-
-  return flag;  
+  return distance;  
 }
 
 int m_rs() {
   
   long duration;
   int distance;
-  int flag;
   
   // first clear the trigPin
   digitalWrite(r_trigPin, LOW);
@@ -122,22 +183,15 @@ int m_rs() {
   // Calculate the distance based on duration
   distance = duration*0.034/2;
   delayMicroseconds(10);
-
-  if(distance < 8) {
-    flag = 1;
-  }
-  else {
-    flag = 0;
-  }
   
-  return flag;  
+  return distance;  
 }
 
 int m_fs() {
   
   long duration;
   int distance;
-  int flag;
+  
   // first clear the trigPin
   digitalWrite(f_trigPin, LOW);
   delayMicroseconds(2);
@@ -152,13 +206,6 @@ int m_fs() {
   // Calculate the distance based on duration
   distance = duration*0.034/2;
   delayMicroseconds(10);
-  
-  if(distance < 8) {
-    flag = 1;
-  }
-  else {
-    flag = 0;
-  }
- 
-  return flag;  
+
+  return distance;  
 }
