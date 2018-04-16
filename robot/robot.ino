@@ -81,7 +81,6 @@ void loop() {
    * g    stop motor
    * def  stop motor
    */
-   calibrate_singlewall_left(2,3);
   char ch = Serial.read();
   if(ch=='a'){
     move_forward();
@@ -111,9 +110,9 @@ void loop() {
 // *** function to move forward avoiding walls
 void move_forward() {
   int l, r, f;
-  l = 1000; // measure left sensor reading
-  r = 100; // measure right sensor reading
-  f = 100; // measure front sensor reading
+  l = m_ls(); // measure left sensor reading
+  r = m_rs(); // measure right sensor reading
+  f = m_fs(); // measure front sensor reading
   if(l <= threshold && r <= range) {
     calibrate(l, r);
   }
