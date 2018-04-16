@@ -108,6 +108,17 @@ void stop_m() {
   digitalWrite(mL_Pin2, LOW);  
 }
 
+/*
+* The below functions will be used to make slight turns,
+* in either directions, left or right, but not both.
+* The turn is achieved by stopping any motor in the direction
+* we want to make a turn, for duration 'd'.
+* After some trials and errors, we have decided that for slight 
+* turns, the paramater sd = 0.1 s will be fine. anything more than
+* that will increase turn angle and will result into zig zag motion.
+* 
+*/
+
 void stop_lm(float d) {
   digitalWrite(mL_Pin1, LOW);
   digitalWrite(mL_Pin2, LOW);
