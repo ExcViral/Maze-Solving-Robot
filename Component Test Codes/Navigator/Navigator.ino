@@ -117,10 +117,16 @@ void move_forward(int threshold) {
   else if(r <= threshold && l >= range) {
     calibrate_singlewall_right(r, threshold);
   }
+  else if(l <= range && r >= range) {
+    calibrate_singlewall_left(l, threshold);
+  }
+  else if(r <= range && l >= range) {
+    calibrate_singlewall_right(r, threshold);
+  }
   else if(f < threshold) {
     stop_m();
   }
-  else {
+  else if(l >= range && r >= range){
     mforward();
   }
   
@@ -155,19 +161,19 @@ void calibrate(int left_distance,int right_distance){
 
 void calibrate_singlewall_left(int distance,int threshold){
   if(distance < threshold){
-    stop_rm(delay_time);
+    stop_rm(delay_time*2);
   }  
   else if(distance > threshold){
-    stop_lm(delay_time);
+    stop_lm(delay_time*2);
   }
 }
 
 void calibrate_singlewall_right(int distance,int threshold){
   if(distance < threshold){
-    stop_lm(delay_time);
+    stop_lm(delay_time*2);
   }  
   else if(distance > threshold){
-    stop_rm(delay_time);
+    stop_rm(delay_time*2);
   }
 }
 
