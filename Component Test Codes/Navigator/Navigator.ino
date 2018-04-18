@@ -105,28 +105,28 @@ void move_forward(int threshold) {
   r = m_rs(); // measure right sensor reading
   f = m_fs(); // measure front sensor reading
   
-  if(l <= threshold && r <= range) {
+  if(l < threshold && r < range) {
     calibrate(l, r);
   }
-  else if(r <= threshold && l <= range) {
+  else if(r < threshold && l < range) {
     calibrate(l, r);
   }
-  else if(l <= threshold && r >= range) {
+  else if(l < threshold && r > range) {
     calibrate_singlewall_left(l, threshold);
   }
-  else if(r <= threshold && l >= range) {
+  else if(r < threshold && l > range) {
     calibrate_singlewall_right(r, threshold);
   }
-  else if(l <= range && r >= range) {
+  else if(l < range && r > range) {
     calibrate_singlewall_left(l, threshold);
   }
-  else if(r <= range && l >= range) {
+  else if(r < range && l > range) {
     calibrate_singlewall_right(r, threshold);
   }
   else if(f < threshold) {
     stop_m();
   }
-  else if(l >= range && r >= range){
+  else if(l > range && r > range){
     mforward();
   }
   
