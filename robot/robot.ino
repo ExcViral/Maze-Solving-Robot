@@ -39,7 +39,7 @@ const int mL_Pin2 = 13;
 
 // ultrasonic sensors
 const int range = 8; // Range within which wall is to be checked
-const int r_freq = 20; // how many readings to take?
+const int r_freq = 2; // how many readings to take?
 // motor control
 const float tp = 0.8; // Turn parameter in seconds, used to make 90 deg turns
 const float stp = 0.1; // Slight turn parameter, used to make slight turns
@@ -47,6 +47,11 @@ const float sstp = 0.5; // Slight turn parameter, used to make sharp slight turn
 const int threshold = 4; // Threshold for calibrating forward motion within wall(s)
 // ir sensors
 const float sd = 0.2; // Stopping delay to allow robot to reach center
+
+// Global logic variables
+
+int make_move = 0;
+
 void setup() {
   // Setting up pins
   // Ultrasonic Sensors
@@ -83,7 +88,7 @@ void loop() {
    */
   char ch = Serial.read();
   if(ch=='a'){
-    move_forward();
+    make_move = 1;
   }
   else if(ch=='b'){
     takeSensorReading();
@@ -101,7 +106,11 @@ void loop() {
     turn_180();
   }
   else if(ch=='g'){
+    make_move = 0;
     stop_m();
+  }
+  if(make_move == 1) {
+    move_forward();
   }
 }
 
@@ -116,25 +125,25 @@ void move_forward() {
   if(l <= threshold && r <= range) {
     calibrate(l, r);
   }
-  else if(r <= threshold && l <= range) {
+  else if(r < threshold && l < range) {
     calibrate(l, r);
   }
-  else if(l <= threshold && r >= range) {
+  else if(l < threshold && r > range) {
     calibrate_singlewall_left(l, threshold);
   }
-  else if(r <= threshold && l >= range) {
+  else if(r < threshold && l > range) {
     calibrate_singlewall_right(r, threshold);
   }
-  else if(l <= range && r >= range) {
+  else if(l < range && r > range) {
     calibrate_singlewall_left(l, threshold);
   }
-  else if(r <= range && l >= range) {
+  else if(r < range && l > range) {
     calibrate_singlewall_right(r, threshold);
   }
   else if(f < threshold) {
     stop_m();
   }
-  else if(l >= range && r >= range){
+  else if(l > range && r > range){
     mforward();
   } 
 }
@@ -150,10 +159,10 @@ void calibrate(int left_distance,int right_distance){
 // *** calibrate if only left wall is in range
 void calibrate_singlewall_left(int distance,int threshold){
   if(distance < threshold){
-    stop_rm(sstp);
+    stop_rm(stp);
   }  
   else if(distance > threshold){
-    stop_lm(sstp);
+    stop_lm(stp);
   }
 }
 // *** calibrate if only right wall is in range
