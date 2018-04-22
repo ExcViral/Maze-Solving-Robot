@@ -9,6 +9,21 @@
 * April 16, 2018
 */
 
+// mpu 6050
+
+#include <MPU6050.h>
+#include <Wire.h>
+MPU6050 mpu;
+
+// Timers
+unsigned long timer = 0;
+float timeStep = 0.01;
+
+// Pitch, Roll and Yaw values
+float pitch = 0;
+float roll = 0;
+float yaw = 0;
+
 // Pin initializations
 
 // Ultrasonic sensors
@@ -41,7 +56,7 @@ const int mL_Pin2 = 13;
 const int range = 8; // Range within which wall is to be checked
 const int r_freq = 2; // how many readings to take?
 // motor control
-const float tp = 0.8; // Turn parameter in seconds, used to make 90 deg turns
+const float tp = 0.1; // Turn parameter in seconds, used to make 90 deg turns
 const float stp = 0.1; // Slight turn parameter, used to make slight turns
 const float sstp = 0.5; // Slight turn parameter, used to make sharp slight turns
 const int threshold = 4; // Threshold for calibrating forward motion within wall(s)
@@ -49,10 +64,24 @@ const int threshold = 4; // Threshold for calibrating forward motion within wall
 const float sd = 0.2; // Stopping delay to allow robot to reach center
 
 // Global logic variables
-
+// flags for turing
+int l = 0, r = 0;
 int make_move = 0;
 
 void setup() {
+  
+  // Open serial communication
+  Serial.begin(115200);
+  
+  // Initialize MPU6050
+  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
+  }
+  mpu.calibrateGyro();
+  mpu.setSleepEnabled(true);
+
   // Setting up pins
   // Ultrasonic Sensors
   pinMode(r_trigPin, OUTPUT); // Sets trigpin as output
@@ -68,15 +97,12 @@ void setup() {
   pinMode(mR_Pin2, OUTPUT);
   pinMode(mL_Pin1, OUTPUT);
   pinMode(mL_Pin2, OUTPUT);
-
-  // Open Serial communication
-  Serial.begin(9600); 
-  Serial.println("Serial is ready!!");
 }
 
 void loop() {
+   int rotationAngle = checkGyro();
    /*
-   * Switch Case Function Map
+   * Function Map
    * a    Move Forward
    * b    Take Sensor Reading
    * c    Check Center
@@ -86,31 +112,61 @@ void loop() {
    * g    stop motor
    * def  stop motor
    */
-  char ch = Serial.read();
-  if(ch=='a'){
-    make_move = 1;
-  }
-  else if(ch=='b'){
-    takeSensorReading();
-  }
-  else if(ch=='c'){
-    checkCenter();
-  }
-  else if(ch=='d'){
-    tleft_90();
-  }
-  else if(ch=='e'){
-    tright_90();
-  }
-  else if(ch=='f'){
-    turn_180();
-  }
-  else if(ch=='g'){
-    make_move = 0;
-    stop_m();
+  if(Serial.available() > 0) {
+    char ch = Serial.read();
+    if(ch=='a'){
+      make_move = 1;
+    }
+    else if(ch=='b'){
+      takeSensorReading();
+    }
+    else if(ch=='c'){
+      checkCenter();
+    }
+    else if(ch=='d'){
+        yaw = 0;
+        mpu.setSleepEnabled(false);
+        l = 1;
+    }
+    else if(ch=='e'){
+        yaw = 0;
+        mpu.setSleepEnabled(false);
+        r = 1;
+    }
+    else if(ch=='f'){
+      turn_180();
+    }
+    else if(ch=='g'){
+      make_move = 0;
+      l = 0;
+      r = 0;
+      stop_m();
+    }
+    else if(ch=='h'){
+      
+    }
   }
   if(make_move == 1) {
     move_forward();
+  }
+  else if(l == 1) {
+    tleft_90();
+    if(rotationAngle > 60) {
+      mleft.stopm();
+      mright.stopm();
+      l = 0;
+      mpu.setSleepEnabled(true);
+      yaw = 0;
+    }
+  }
+  else if(r == 1) {
+    tright_90();
+    if(rotationAngle < -60) {
+      mleft.stopm();
+      mright.stopm();
+      r = 0;
+      mpu.setSleepEnabled(true);
+    }
   }
 }
 
@@ -118,11 +174,22 @@ void loop() {
 
 // *** function to move forward avoiding walls
 void move_forward() {
-  int l, r, f;
+  
+  int l,r, f;
   l = m_ls(); // measure left sensor reading
   r = m_rs(); // measure right sensor reading
   f = m_fs(); // measure front sensor reading
-  if(l <= threshold && r <= range) {
+  
+  /*Serial.print(l);
+  Serial.print("  ");
+  Serial.print(r);
+  Serial.print("  ");
+  Serial.println(f);
+  */
+  if(f <= threshold) {
+    stop_m();
+  }
+  else if(l < threshold && r < range) {
     calibrate(l, r);
   }
   else if(r < threshold && l < range) {
@@ -139,9 +206,6 @@ void move_forward() {
   }
   else if(r < range && l > range) {
     calibrate_singlewall_right(r, threshold);
-  }
-  else if(f < threshold) {
-    stop_m();
   }
   else if(l > range && r > range){
     mforward();
@@ -168,10 +232,10 @@ void calibrate_singlewall_left(int distance,int threshold){
 // *** calibrate if only right wall is in range
 void calibrate_singlewall_right(int distance,int threshold){
   if(distance < threshold){
-    stop_lm(sstp);
+    stop_lm(stp);
   }  
   else if(distance > threshold){
-    stop_rm(sstp);
+    stop_rm(stp);
   }
 }
 
@@ -184,7 +248,7 @@ void takeSensorReading() {
   int f = isWallOnFront();
   int r = isWallOnRight();
   int l = isWallOnLeft();
-  int reading = (f*100)+(r*10)+l;
+  int reading = (l*100)+(f*10)+r;
   Serial.println(reading);
 }
 // *** check if wall is within range on left side
@@ -313,9 +377,6 @@ void tleft_90() {
   digitalWrite(mR_Pin2, HIGH);
   digitalWrite(mL_Pin1, LOW);
   digitalWrite(mL_Pin2, HIGH);  
-  int delays = tp * 1000; // turn for duration = tp, then stop
-  delay(delays);
-  stop_m();
 }
 // *** turn right 90 deg
 void tright_90() {
@@ -323,20 +384,8 @@ void tright_90() {
   digitalWrite(mR_Pin2, LOW);
   digitalWrite(mL_Pin1, HIGH);
   digitalWrite(mL_Pin2, LOW);  
-  int delays = tp * 1000; // turn for duration = tp, then stop
-  delay(delays);
-  stop_m();
 }
-// *** turn 180 degrees
-void turn_180() {
-  digitalWrite(mR_Pin1, HIGH);
-  digitalWrite(mR_Pin2, LOW);
-  digitalWrite(mL_Pin1, HIGH);
-  digitalWrite(mL_Pin2, LOW);  
-  int delays = 2 * tp * 1000;
-  delay(delays);
-  stop_m();
-}
+
 // *** turn slight left by stopping left motor for duration = d
 void stop_lm(float d) {
   digitalWrite(mL_Pin1, LOW);
@@ -360,3 +409,27 @@ void stop_m() {
   digitalWrite(mL_Pin1, LOW);
   digitalWrite(mL_Pin2, LOW);  
 }
+
+/***
+* The below function will be used to check angle of rotation on 
+* the axis of turning.
+* The code was adapted from: 
+* http://www.electronicwings.com/arduino/mpu6050-interfacing-with-arduino-uno
+*/
+
+int checkGyro() {
+  if(!mpu.getSleepEnabled()) {
+    timer = millis();
+    // Read normalized values
+    Vector norm = mpu.readNormalizeGyro();
+    // Calculate Pitch, Roll and Yaw
+    pitch = pitch + norm.YAxis * timeStep;
+    roll = roll + norm.XAxis * timeStep;
+    yaw = yaw + norm.ZAxis * timeStep;
+    // Wait to full timeStep period
+    Serial.println(yaw);
+    delay((timeStep*1000) - (millis() - timer));
+    return yaw;
+  }
+}
+
